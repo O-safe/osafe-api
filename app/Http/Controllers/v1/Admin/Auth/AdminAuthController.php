@@ -223,10 +223,11 @@ class AdminAuthController extends Controller
                 ], 401);
             }
 
+            // Bug fix: key on both user_id AND device_id so that
+            // a second device does not overwrite the first trusted device.
             DB::table('user_devices')->updateOrInsert(
-                ['user_id' => $staffId],
+                ['user_id' => $staffId, 'device_id' => $deviceId],
                 [
-                    'device_id'   => $deviceId,
                     'device_type' => Config::requestDetails()['device'] ?? 'Unknown',
                     'verified_at' => now(),
                     'updated_at'  => now(),

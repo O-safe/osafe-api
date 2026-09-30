@@ -28,7 +28,7 @@ class PasswordChangeOtp extends Notification implements ShouldQueue
             urlencode($notifiable->email);
 
         return (new MailMessage)
-            ->subject('Reset Your Password')
+            ->subject('Confirm Password Change Request - O SAFE Security')
             ->view('emails.admin.password-change-otp', [
                 'url' => $url,
                 'title' => $this->adminTitle,

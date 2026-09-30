@@ -5,8 +5,8 @@ namespace App\Http\Controllers\v1\User\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\User\User;
-use App\Notifications\Member\LoginOtpMail;
-use App\Notifications\member\ResetPasswordMail;
+use App\Notifications\User\LoginOtpMail;
+use App\Notifications\User\ResetPasswordMail;
 use App\Services\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -178,10 +178,11 @@ class UserAuthController extends Controller
                 ], 401);
             }
 
+            // Bug fix: key on both user_id AND device_id so that
+            // a second device does not overwrite the first trusted device.
             DB::table('user_devices')->updateOrInsert(
-                ['user_id' => $userId],
+                ['user_id' => $userId, 'device_id' => $deviceId],
                 [
-                    'device_id'   => $deviceId,
                     'device_type' => Config::requestDetails()['device'] ?? 'Unknown',
                     'verified_at' => now(),
                     'updated_at'  => now(),
@@ -334,7 +335,6 @@ class UserAuthController extends Controller
                 'lga:lga_id,lga_name,state_id',
                 'lga.state:state_id,state_name,country_id',
                 'lga.state.country:country_id,country_name',
-                'wallet',
             ])->findOrFail($user->user_id)
         );
         return response()->json([

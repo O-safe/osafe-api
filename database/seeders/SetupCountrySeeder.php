@@ -13,6 +13,7 @@ class SetupCountrySeeder extends Seeder
     {
         $countries = [
             [
+                'country_id' => 1,
                 'country_name' => 'Nigeria',
                 'country_code' => 'NG',
                 'created_at' => now(),

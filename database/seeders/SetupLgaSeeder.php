@@ -934,19 +934,21 @@ class SetupLgaSeeder extends Seeder
             ],
 
         ]; {
-            $data = [];
+        $data = [];
+        $lgaId = 1;
 
-            foreach ($localGovernmentAreas as $stateId => $lgas) {
-                foreach ($lgas as $lga) {
-                    $data[] = [
-                        'state_id' => $stateId,
-                        'lga_name' => $lga,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
+        foreach ($localGovernmentAreas as $stateId => $lgas) {
+            foreach ($lgas as $lga) {
+                $data[] = [
+                    'lga_id' => $lgaId++,
+                    'state_id' => $stateId,
+                    'lga_name' => $lga,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
-            SetupLga::insertOrIgnore($data);
+        }
+        SetupLga::insertOrIgnore($data);
         }
     }
 }

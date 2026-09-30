@@ -12,8 +12,10 @@ class SetupTitleSeeder extends Seeder
     {
         $titles = ['MR', 'MRS', 'MISS', 'DR', 'PROF', 'ENGR', 'HON', 'CHIEF', 'REV', 'PASTOR'];
         $insertData = [];
+        $titleId = 1;
         foreach ($titles as $title) {
             $insertData[] = [
+                'title_id' => $titleId++,
                 'title_name' => $title,
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -32,7 +32,7 @@ class AccountLockedResetPassword extends Notification implements ShouldQueue
             urlencode($notifiable->email);
 
         return (new MailMessage)
-            ->subject('Account locked - Reset Your Password')
+            ->subject('Account Locked: Security Action Required - O SAFE Security')
             ->view('emails.admin.account-lock-resetpassword', [
                 'url' => $url,
                 'fullName' => $this->fullName,

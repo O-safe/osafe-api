@@ -15,6 +15,19 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
     'frontend_url' => env('APP_FRONTEND_URL', 'http://localhost:3000'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application API Key
+    |--------------------------------------------------------------------------
+    |
+    | A dedicated API key for the GlobalApiKey middleware. This is intentionally
+    | separate from APP_KEY (which is the Laravel encryption key and must never
+    | be used as an API secret). Set APP_API_KEY in .env for production.
+    | Leave empty in local development to bypass the check.
+    |
+    */
+    'api_key' => env('APP_API_KEY', ''),
     /*
     |--------------------------------------------------------------------------
     | Application Environment

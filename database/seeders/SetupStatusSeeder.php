@@ -36,9 +36,11 @@ class SetupStatusSeeder extends Seeder
         ];
 
         $insertData = [];
+        $statusId = 1;
 
         foreach ($statuses as $status) {
             $insertData[] = [
+                'status_id' => $statusId++,
                 'status_name' => $status,
             ];
         }

@@ -31,7 +31,7 @@ class ResetPasswordMail extends Notification implements ShouldQueue
             urlencode($notifiable->email);
 
         return (new MailMessage)
-            ->subject('Reset Your Password')
+            ->subject('Reset Your Admin Password - O SAFE Security')
             ->view('emails.admin.reset-password', [
                 'user' => $notifiable,
                 'url' => $url,

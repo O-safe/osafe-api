@@ -52,8 +52,10 @@ class SetupStateSeeder extends Seeder
         ];
 
         $insertData = [];
+        $stateId = 1;
         foreach ($states as $state) {
             $insertData[] = [
+                'state_id' => $stateId++,
                 'country_id' => 1,   // Nigeria
                 'state_name' => $state,
             ];

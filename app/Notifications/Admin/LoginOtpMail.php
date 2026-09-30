@@ -28,7 +28,7 @@ class LoginOtpMail extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Verify Your New Device - Unity Co-op')
+            ->subject('Verify Your Admin Login - O SAFE Security')
             ->view('emails.admin.verify-login-otp', [
                 'device' => $this->device,
                 'otp' => $this->otp,

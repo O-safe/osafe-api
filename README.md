@@ -1,330 +1,350 @@
-# AjoNova API 🚀
+# O SAFE Security API
 
-![CI](https://img.shields.io/badge/CI-Ready-success)
-![PHP](https://img.shields.io/badge/PHP-8.4-blue)
-![Laravel](https://img.shields.io/badge/Laravel-12-red)
-![Status](https://img.shields.io/badge/Status-Active%20Development-success)
+[![PHP](https://img.shields.io/badge/PHP-8.2%2B-blue.svg)](https://php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
+[![License](https://img.shields.io/badge/License-Proprietary-darkgreen.svg)](#license)
 
-**AjoNova API** is an **enterprise-grade, API-first cooperative financial management platform** designed for cooperative societies, credit unions, employee cooperatives, and other member-driven financial organizations.
-
-Built with **Laravel 12**, the platform automates cooperative operations including **member management, savings, contributions, loans, guarantors, repayments, wallets, accounting, and financial reporting** while maintaining strong emphasis on **security, transparency, accountability, and auditability**.
-
-AjoNova is engineered as a **production-ready financial SaaS platform**, not a demo or academic project.
+> **O SAFE Security** is a next-generation security and physical device protection SaaS backend platform. It provides real-time physical device monitoring, location tracking, geofencing, automated security alerts, family safety circles, RBAC-protected administrative controls, and subscription billing services.
 
 ---
 
-# 📑 Table of Contents
+## Overview
 
-* [Product Vision](#-product-vision)
-* [System Architecture](#-system-architecture)
-* [Technology Stack](#-technology-stack)
-* [Core Platform Features](#-core-platform-features)
-* [Loan & Repayment Engine](#-loan--repayment-engine)
-* [API Design](#-api-design)
-* [Security Best Practices](#-security-best-practices)
-* [Local Development Setup](#-local-development-setup)
-* [Product Roadmap](#-product-roadmap)
-* [Contributing](#-contributing)
-* [License](#-license)
-* [Company](#-company)
+O SAFE Security provides a high-reliability RESTful API backend engineered for scalable physical safety networks, personal security hardware, and family protection circles. The architecture leverages Laravel 12, Redis queues, WebSockets (Reverb), Sanctum multi-guard token authentication, Spatie RBAC policies, and a modular payment provider abstraction layer.
 
 ---
 
-# 🧠 Product Vision
+## Core Capabilities
 
-Many cooperative societies still rely on fragmented systems, spreadsheets, and manual record keeping, leading to operational inefficiencies, inaccurate financial records, poor transparency, and weak policy enforcement.
+### 1. Account & Security Authentication
+- **Multi-Guard Sanctum Authentication**: Isolated authentication guards for end-users (`user`) and administrative staff (`admin`).
+- **Two-Factor Authentication (2FA)**: Email One-Time Passcode (OTP) verification for untrusted device sign-ins.
+- **Trusted Device Management**: Device fingerprinting (`user_devices` table) with policy-scoped device authorization.
+- **Account Lockout Protection**: Automated account restriction following consecutive failed authentication attempts.
 
-AjoNova solves these challenges by providing a secure, centralized, and scalable financial platform that automates cooperative operations while enforcing organizational policies and providing real-time visibility into member financial activities.
+### 2. Physical Device Integration & Telemetry
+- **Hardware Integration Layer**: Dedicated endpoints (`/api/v1/device-integration/`) for physical security hardware.
+- **Device Provisioning Lifecycle**: Unassigned -> Assigned -> Active -> Suspended -> Deactivated -> Reassigned.
+- **Realtime Telemetry Ingestion**: High-frequency processing of battery status, network signal strength, GPS coordinates, and status heartbeats.
+- **Command Dispatch & Acknowledgements**: Secure remote command pipeline (e.g., sound alarm, lock device, ping location) with acknowledgment tracking.
+- **Device Credential Rotation**: HMAC secret issuance, rotation, and revocation for hardware authentication.
 
----
+### 3. Location Ingestion & Geofencing Engine
+- **Location History Tracking**: GPS coordinate ingestion with spatial accuracy metrics and timestamping.
+- **Dynamic Geofence Zones**: Circular and polygon geofence boundary creation with enter/exit event evaluation.
+- **Automated Geofence Alerts**: Immediate event generation when a monitored device breaches defined geofence perimeters.
 
-# 🏗️ System Architecture
+### 4. Family Safety Circles
+- **Family Group Management**: Creation and administration of family safety pools with owner controls.
+- **Invitation Flow**: Tokenized email invitation system for onboarding family members.
+- **Role-Based Access Control**: Granular family roles (`owner`, `admin`, `member`, `child`) dictating device monitoring and emergency control rights.
+- **Shared Device Telemetry**: Shared access to family device locations and emergency alerts based on role policies.
 
-* API-First Architecture
-* Policy-Driven Financial Engine
-* Modular Laravel Architecture
-* Stateless RESTful APIs
-* Role-Based Access Control (RBAC)
-* Financial Audit Trail
-* Queue-Based Background Processing
-* Horizontally Scalable
+### 5. Realtime Events & Notifications
+- **WebSocket Broadcasting**: Realtime event dispatch via Laravel Broadcasting (Reverb) over private user and family channels (`private-user.{id}`, `private-family.{id}`).
+- **Multi-Channel Dispatch Engine**: Background queue workers delivering in-app notifications, email notifications, and webhook payloads.
+- **Notification Preferences & Quiet Hours**: User-configurable delivery channel preferences, category suppressions, and scheduled quiet hours.
 
-The platform separates business logic from presentation, allowing multiple frontend clients—including web portals and future mobile applications—to consume the same secure API.
+### 6. Subscriptions & Billing Engine
+- **Plan Management**: Multi-tier subscription plans (Free, Pro Guard, Family Shield) with device and feature limits.
+- **Subscription Lifecycle**: Automated handling of activations, renewals, grace periods, suspensions, expirations, and cancellations.
+- **Payment Provider Abstraction**: Decoupled payment provider interface (`PaymentProviderInterface`) supporting Paystack and Null driver fallbacks.
+- **Webhook Processing**: Cryptographically signed webhook signature verification with Redis-backed idempotency protection.
+- **Billing Transaction Audit**: Full ledger recording for transactions, invoice references, and payment method tokens.
 
----
-
-# 🧰 Technology Stack
-
-## Backend
-
-* Laravel 12
-* PHP 8.4
-* MySQL
-* Redis
-
-## Frontend Clients
-
-* Next.js
-* RESTful API Consumption
-
-## Infrastructure & Tooling
-
-* GitHub Actions (CI)
-* Laravel Queues & Jobs
-* Laravel Scheduler
-* Laravel Logging
-* Redis Cache & Queues
+### 7. Support & Administration
+- **Staff Operations Portal**: Administrative endpoints for managing system health, users, devices, subscription tiers, and audit logs.
+- **Support Ticket Desk**: Customer support ticket management with multi-threaded messaging and status resolution.
+- **Audit Logging**: Comprehensive system activity logging recording security events, IP addresses, and administrative actions.
 
 ---
 
-# ✨ Core Platform Features
+## Technology Stack
 
-## 👥 Member Management
-
-* Member registration
-* Membership lifecycle management
-* Employment information
-* KYC & profile management
-* Member status tracking
-* Beneficiary management
-
----
-
-## 💰 Savings & Contribution Management
-
-* Compulsory savings
-* Voluntary savings
-* Target savings
-* Special savings plans
-* Savings history
-* Refund processing
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Framework** | Laravel 12.x | Core Web Application Framework |
+| **Language** | PHP 8.2+ | Server-Side Execution |
+| **Database** | MySQL 8.0.30+ | Relational Data Storage |
+| **Authentication** | Laravel Sanctum 4.x | Token-Based API Authentication |
+| **Authorization** | Spatie Laravel Permission 6.x | Role-Based Access Control (RBAC) |
+| **Cache & Session** | Redis (predis) | High-Performance Data & Session Cache |
+| **Queue System** | Laravel Queues (Redis) | Asynchronous Background Job Processing |
+| **Realtime Engine** | Laravel Broadcasting / Reverb | Realtime WebSocket Event Streaming |
+| **Mail & Notifications** | Laravel Mail & Notifications | Transactional Email & In-App Alerts |
+| **Testing** | PHPUnit 11.x / Laravel Test Suite | Automated Regression & Security Tests |
 
 ---
 
-## 🏦 Loan Management
+## System Architecture
 
-* Loan application
-* Loan approval workflow
-* Eligibility validation
-* Savings-based loan limits
-* Multiple loan products
-* Interest computation
-* Loan schedules
-* Loan disbursement
+```mermaid
+flowchart TB
+    subgraph Clients["Clients & Edge Hardware"]
+        Mobile["Mobile & Web Apps"]
+        Hardware["Physical Security Devices"]
+    end
 
----
+    subgraph Gateway["API & Security Boundary"]
+        API["Laravel 12 REST API<br/>(/api/v1)"]
+        Sanctum["Sanctum Multi-Guard Auth<br/>(User / Admin)"]
+        DevAuth["Device HMAC Auth"]
+        Policies["Spatie RBAC & Model Policies"]
+    end
 
-## 💳 Loan Repayment Engine
+    subgraph Services["Domain Service Layer"]
+        UserSvc["User & Auth Service"]
+        DeviceSvc["Physical Device Service"]
+        LocationSvc["Location & Geofence Service"]
+        FamilySvc["Family Safety Circle Service"]
+        NotifySvc["Notification & Event Service"]
+        BillingSvc["Subscription & Billing Service"]
+    end
 
-* Salary deductions
-* Wallet repayments
-* Manual repayments
-* Outstanding balance tracking
-* Missed payment detection
-* Automatic loan closure
+    subgraph Infrastructure["Data & Storage Infrastructure"]
+        MySQL[("MySQL 8.0 Database")]
+        Redis[("Redis Cache & Queues")]
+        Reverb["Laravel Reverb WebSockets"]
+    end
 
----
+    subgraph Providers["External Integration Layer"]
+        MailServer["SMTP Mail Gateway"]
+        Paystack["Payment Gateway (Paystack/Null)"]
+    end
 
-## 🤝 Guarantor Management
+    Mobile -->|HTTPS / REST| API
+    Hardware -->|HTTP Telemetry / Commands| API
+    API --> Sanctum
+    API --> DevAuth
+    Sanctum --> Policies
+    Policies --> Services
+    DevAuth --> DeviceSvc
 
-* Multiple guarantors
-* Exposure tracking
-* Guarantor approval workflow
-* Liability management
-* Default enforcement
+    UserSvc --> MySQL
+    DeviceSvc --> MySQL
+    LocationSvc --> MySQL
+    FamilySvc --> MySQL
+    NotifySvc --> Redis
+    NotifySvc --> Reverb
+    NotifySvc --> MailServer
+    BillingSvc --> MySQL
+    BillingSvc --> Paystack
 
----
-
-## 💼 Wallet Management
-
-* Member wallets
-* Wallet funding
-* Internal transfers
-* Wallet transaction history
-* Balance management
-
----
-
-## 📊 Reports & Analytics
-
-* Member statements
-* Savings reports
-* Loan reports
-* Financial summaries
-* Defaulters report
-* Risk analysis
-* Exportable reports
-
----
-
-## 🔐 Authentication & Security
-
-* Token-based authentication
-* Password reset
-* Email verification
-* OTP verification
-* Session management
-* Device tracking
-
----
-
-## 📝 Audit & Activity Logging
-
-* User activity logs
-* Financial audit trails
-* Security logs
-* Policy change history
-* Read-only audit records
-
----
-
-## ⚡ Performance Optimization
-
-* Redis caching
-* Optimized queries
-* Queue processing
-* Background jobs
-* High-concurrency readiness
-
----
-
-# 💳 Loan & Repayment Engine
-
-## Loan Eligibility
-
-* Configurable contribution period
-* Active membership validation
-* Savings threshold validation
-* Existing loan verification
-* Policy enforcement
-
----
-
-## Interest Calculation
-
-Supports configurable loan products with customizable:
-
-* Flat Interest
-* Reducing Balance (Future)
-* Flexible repayment durations
-
----
-
-## Repayment Methods
-
-* Salary Deduction
-* Wallet Debit
-* Manual Payment
-* Bank Transfer (Future)
-
----
-
-# 📡 API Design
-
-AjoNova exposes a secure RESTful API powering all frontend applications.
-
-## API Principles
-
-* RESTful Architecture
-* Stateless Requests
-* JSON Payloads
-* Versioned APIs
-* Secure Authentication
-* Role-Based Authorization
-* Consistent Error Responses
-
-Example Local URL:
-
-```text
-http://localhost/api
+    Services --> Redis
 ```
 
 ---
 
-# 🔒 Security Best Practices
+## Security Architecture
 
-* Role-Based Access Control
-* Secure Authentication
-* Policy Enforcement
-* Financial Audit Trails
-* Environment-Based Configuration
-* Activity Logging
-* Input Validation
-* Secure File Handling
+O SAFE Security enforces strict defense-in-depth principles:
+
+- **Isolated Authentication Guards**: Administrative staff (`admin`) and end-users (`user`) run on separate, non-overlapping authentication models.
+- **Physical Device HMAC Credentials**: Hardware endpoints authenticate using dedicated HMAC-SHA256 signature headers (`X-Device-Signature`, `X-Device-ID`).
+- **Policy-Based Authorization**: Every resource endpoint is governed by explicit Laravel Policy classes enforcing strict tenant and user-level data isolation.
+- **Trusted Device Fingerprinting**: Sign-in from new browsers or devices requires One-Time Passcode (OTP) verification.
+- **Webhook Cryptographic Verification**: Payment webhooks enforce HMAC signature checks (`X-Paystack-Signature`) and Redis idempotency locks.
+- **Rate Limiting & Throttling**: Strict request rate limiting on authentication, OTP generation, and telemetry ingestion routes.
+- **Encrypted Secrets & Safe Environment**: Sensitive database attributes (tokens, API secrets) are encrypted at rest using AES-256-GCM via `SensitiveFieldEncryption`.
 
 ---
 
-# 📦 Local Development Setup
+## API Architecture & Route Groups
+
+All endpoints are versioned under `/api/v1/`:
+
+```
+/api/v1/
+├── user/                       (Authenticated User Endpoints)
+│   ├── auth/                   (Login, OTP, password reset, logout)
+│   ├── user-profile            (Profile fetch & management)
+│   ├── devices/                (Assigned device telemetry & remote commands)
+│   ├── location/               (Location history, live tracking, geofences)
+│   ├── families/               (Family group creation, invitations, members)
+│   ├── alerts/                 (Security alert management & resolution)
+│   ├── notifications/          (In-app notifications & quiet hours preferences)
+│   ├── subscriptions/          (Plan selection, checkout, subscription management)
+│   ├── billing/                (Transaction history & payment methods)
+│   └── support/                (Support ticket submission & messaging)
+│
+├── admin/                      (Authenticated Staff Admin Endpoints)
+│   ├── auth/                   (Admin login, OTP, password reset)
+│   ├── staff/                  (Staff account administration — auth:admin protected)
+│   ├── users/                  (User management & status controls)
+│   ├── devices/                (Physical device inventory & credential rotation)
+│   ├── families/               (System-wide family group oversight)
+│   ├── plans/                  (Subscription tier configuration)
+│   ├── subscriptions/          (Global subscription administration)
+│   ├── support/                (Support ticket resolution desk)
+│   ├── system/                 (System health checks & incident management)
+│   ├── audit-logs/             (System activity audit log)
+│   └── role/                   (RBAC role & permission assignment)
+│
+├── device-integration/         (Physical Hardware Boundary)
+│   ├── heartbeat               (Hardware status pulse)
+│   ├── location                (GPS coordinate batch ingestion)
+│   ├── battery                 (Battery level telemetry)
+│   ├── network                 (Cellular/Wi-Fi telemetry)
+│   ├── status                  (Hardware diagnostics)
+│   └── commands/               (Remote command fetch & ACK pipeline)
+│
+├── setup/                      (Public Reference Data)
+│   ├── country, state, lga, gender, title, status, means-of-identification
+│
+└── webhooks/                   (External Service Ingress)
+    └── billing                 (Paystack/Provider webhook receiver)
+```
+
+---
+
+## Repository Structure
+
+```
+o-safe-api/
+├── app/
+│   ├── Console/                (Artisan scheduled commands)
+│   ├── Enums/                  (Domain enums: DeviceStatus, SubscriptionStatus, etc.)
+│   ├── Events/                 (Broadcasting & domain events)
+│   ├── Exceptions/             (Custom exception handlers & boundary errors)
+│   ├── Http/
+│   │   ├── Controllers/        (v1 User, Admin, DeviceIntegration, Billing controllers)
+│   │   ├── Middleware/         (Sanctum, GlobalApiKey, DeviceAuth, RBAC middleware)
+│   │   ├── Requests/           (Form Request validation rules)
+│   │   └── Resources/          (API JSON transformation resources)
+│   ├── Jobs/                   (Asynchronous queue jobs: logs, notifications, telemetry)
+│   ├── Models/                 (Eloquent domain models: User, Device, Family, Geofence, etc.)
+│   ├── Notifications/          (User & Admin transactional email notifications)
+│   ├── Policies/               (Authorization policies: Device, Family, Subscription, etc.)
+│   ├── Providers/              (Service providers & PaymentProvider binding)
+│   └── Services/               (Domain service layers: Device, Location, Billing, etc.)
+├── bootstrap/                  (Application bootstrapping & routing configuration)
+├── config/                     (Laravel application configuration files)
+├── database/
+│   ├── factories/              (Testing model factories)
+│   ├── migrations/             (MySQL relational database migrations)
+│   └── seeders/                (Database seeders: RBAC, Plans, Reference Data)
+├── docs/                       (Architecture documentation & cleanup reports)
+├── public/                     (Application public document root & branding assets)
+├── resources/
+│   └── views/                  (Blade email templates: auth, account, security, devices, etc.)
+├── routes/                     (API routes: api.php, channels.php, console.php)
+├── storage/                    (Framework logs, views, and file storage)
+└── tests/                      (PHPUnit Feature & Unit test suites)
+```
+
+---
+
+## Local Development Setup
+
+### Prerequisites
+- PHP 8.2 or higher
+- Composer 2.x
+- MySQL 8.0+
+- Redis 6.x+
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/<organization>/o-safe-api.git
+   cd o-safe-api
+   ```
+
+2. **Install PHP dependencies**:
+   ```bash
+   composer install
+   ```
+
+3. **Configure Environment File**:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Configure Database & Services in `.env`**:
+   ```ini
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=o_safe_db
+   DB_USERNAME=root
+   DB_PASSWORD=your_secure_password
+
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   QUEUE_CONNECTION=redis
+   CACHE_STORE=redis
+   ```
+
+5. **Run Migrations & Seeders**:
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. **Start Local Development Server**:
+   ```bash
+   php artisan serve --port=8000
+   ```
+
+7. **Start Redis Queue Worker**:
+   ```bash
+   php artisan queue:work redis --tries=3
+   ```
+
+---
+
+## Environment Configuration Parameters
+
+| Variable | Category | Description | Example Placeholder |
+|---|---|---|---|
+| `APP_NAME` | Application | Application Title | `O SAFE API` |
+| `APP_ENV` | Application | Environment Mode | `local` / `production` |
+| `APP_KEY` | Application | Application Encryption Key | `base64:...` |
+| `APP_API_KEY` | Security | Global API Header Key (`X-API-KEY`) | `random_secret_string` |
+| `DB_DATABASE` | Database | MySQL Database Name | `o_safe_db` |
+| `REDIS_HOST` | Cache/Queue | Redis Host Address | `127.0.0.1` |
+| `QUEUE_CONNECTION` | Queue | Queue Processing Driver | `redis` |
+| `BROADCAST_CONNECTION` | Realtime | Event Broadcasting Driver | `reverb` |
+| `MAIL_HOST` | Email | SMTP Mail Gateway Host | `smtp.mailtrap.io` |
+| `PAYSTACK_SECRET_KEY` | Billing | Paystack Payment Secret Key | `sk_test_...` |
+
+---
+
+## Testing & Quality Assurance
+
+The repository includes a comprehensive automated test suite covering authentication, RBAC, domain policies, physical device telemetry, subscription lifecycles, billing idempotency, and transactional email rendering.
+
+### Execute Automated Test Suite
 
 ```bash
-git clone https://github.com/nexovaste/AjoNova-API.git
+# Run all automated tests
+php artisan test
 
-cd AjoNova-API
-
-composer install
-
-cp .env.example .env
-
-php artisan key:generate
-
-php artisan migrate
-
-php artisan serve
+# Run focused test suites
+php artisan test --filter=EmailTemplateRenderTest
+php artisan test --filter=DeviceIntegration
+php artisan test --filter=SubscriptionLifecycleTest
+php artisan test --filter=Phase2KProductionSecurityTest
 ```
 
-Redis is recommended for caching, queues, and scheduled jobs.
+---
+
+## Production Deployment Checklist
+
+1. **PHP & Extensions**: Ensure PHP 8.2+ with `pdo_mysql`, `redis`, `mbstring`, `openssl`, `bcmath`, and `gd` extensions enabled.
+2. **Environment Protection**: Set `APP_ENV=production` and `APP_DEBUG=false`. Ensure `.env` is restricted (`chmod 600`).
+3. **Database & Cache Optimization**:
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   php artisan migrate --force
+   ```
+4. **Queue Supervision**: Configure Supervisor or systemd to keep queue workers active (`php artisan queue:work redis --tries=3`).
+5. **HTTPS Enforcement**: Ensure TLS/SSL certificates are bound and HTTPS redirection is enforced at web server level (Nginx/Apache).
 
 ---
 
-# 🗺️ Product Roadmap
+## License
 
-Upcoming features include:
-
-* Multi-Tenant Cooperative Support
-* Mobile Applications
-* Digital Wallet
-* Payment Gateway Integration
-* SMS Notifications
-* Email Notifications
-* AI Financial Insights
-* Accounting Module
-* Budget Management
-* Investment Module
-* Dividend Management
-* Procurement Module
-
----
-
-# 🤝 Contributing
-
-Development follows a structured Git workflow.
-
-* Create feature branches from `develop`
-* Submit Pull Requests to `develop`
-* Ensure CI checks pass before merging
-* Follow coding standards
-* Write reusable, maintainable code
-
----
-
-# 📄 License
-
-AjoNova API is proprietary software developed and maintained by **Nexovaste Technologies**.
-
-License terms will be published as the platform evolves.
-
----
-
-# 🏢 Company
-
-**Nexovaste Technologies**
-
-Building scalable, secure, and future-ready software solutions.
-
-🌐 https://github.com/nexovaste
-
-📧 [contact@nexovaste.com](mailto:contact@nexovaste.com)
-
----
-
-> **AjoNova API** is built with enterprise engineering standards, security-first architecture, and long-term scalability at its core, delivering reliable and policy-driven financial management for modern cooperative societies.
+Proprietary — O SAFE Security Platform. All rights reserved.

@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReadActivity extends Model
 {
-    protected $primaryKey = 'activity_log_id';
+    /**
+     * Primary key fix: migration defines id('read_activity_id') as the PK.
+     * Previously this was incorrectly set to 'activity_log_id' (a FK column),
+     * which caused broken Eloquent behaviour on find(), firstOrCreate(), etc.
+     */
+    protected $primaryKey = 'read_activity_id';
+    public $incrementing = true;
     public $timestamps = false;
     protected $fillable = [
         'activity_log_id',

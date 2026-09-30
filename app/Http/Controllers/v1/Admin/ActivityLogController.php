@@ -259,18 +259,15 @@ class ActivityLogController extends Controller
         }
 
         try {
+            // Core system metrics: staff and user counts.
             $staffCount = \App\Models\Admin\Staff::count();
-            $memberCount = \App\Models\User\User::count();
-            $pendingWithdrawalsCount = \App\Models\Admin\WithdrawalRequest::where('status_id', 5)->count();
-            $pendingLoansCount = \App\Models\Admin\Loan::where('status_id', 5)->count();
+            $userCount  = \App\Models\User\User::count();
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'staffCount' => $staffCount,
-                    'memberCount' => $memberCount,
-                    'pendingWithdrawalsCount' => $pendingWithdrawalsCount,
-                    'pendingLoansCount' => $pendingLoansCount,
+                    'userCount'  => $userCount,
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -288,115 +285,14 @@ class ActivityLogController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
         }
 
-        $days = (int) $request->input('days', 30);
-        if ($days < 1) $days = 30;
-
-        try {
-            $endDate = \Carbon\Carbon::now();
-            $startDate = \Carbon\Carbon::now()->subDays($days - 1)->startOfDay();
-
-            $formattedStartDate = $startDate->format('F d Y');
-            $formattedEndDate = $endDate->format('F d Y');
-
-            $savingsSum = \Illuminate\Support\Facades\DB::table('member_savings')
-                ->where('created_at', '>=', $startDate)
-                ->sum('saving_amount');
-
-            $contributionSum = \Illuminate\Support\Facades\DB::table('member_contributions')
-                ->where('created_at', '>=', $startDate)
-                ->sum('contribution_amount');
-
-            $totalRevenue = (float) ($savingsSum + $contributionSum);
-
-            $withdrawalSum = \Illuminate\Support\Facades\DB::table('withdrawal_requests')
-                ->where('status_id', 6)
-                ->where('attended_at', '>=', $startDate)
-                ->sum('amount');
-
-            $loanSum = \Illuminate\Support\Facades\DB::table('loans')
-                ->where('status_id', 6)
-                ->where('attended_at', '>=', $startDate)
-                ->sum('principal_amount');
-
-            $totalExpenses = (float) ($withdrawalSum + $loanSum);
-
-            $categories = [];
-            $revenueSeries = [];
-            $expensesSeries = [];
-
-            if ($days <= 1) {
-                $categories = ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM'];
-                $revenueSeries = [$totalRevenue * 0.1, $totalRevenue * 0.2, $totalRevenue * 0.3, $totalRevenue * 0.2, $totalRevenue * 0.15, $totalRevenue * 0.05];
-                $expensesSeries = [$totalExpenses * 0.05, $totalExpenses * 0.25, $totalExpenses * 0.4, $totalExpenses * 0.15, $totalExpenses * 0.1, $totalExpenses * 0.05];
-            } elseif ($days <= 7) {
-                for ($i = 6; $i >= 0; $i--) {
-                    $dayDate = \Carbon\Carbon::now()->subDays($i);
-                    $categories[] = $dayDate->format('D, M d');
-                    
-                    $rev = \Illuminate\Support\Facades\DB::table('member_savings')->whereDate('created_at', $dayDate->toDateString())->sum('saving_amount')
-                          + \Illuminate\Support\Facades\DB::table('member_contributions')->whereDate('created_at', $dayDate->toDateString())->sum('contribution_amount');
-                    $exp = \Illuminate\Support\Facades\DB::table('withdrawal_requests')->where('status_id', 6)->whereDate('attended_at', $dayDate->toDateString())->sum('amount')
-                          + \Illuminate\Support\Facades\DB::table('loans')->where('status_id', 6)->whereDate('attended_at', $dayDate->toDateString())->sum('principal_amount');
-
-                    $revenueSeries[] = (float) $rev;
-                    $expensesSeries[] = (float) $exp;
-                }
-            } elseif ($days <= 90) {
-                for ($i = 5; $i >= 0; $i--) {
-                    $subStart = \Carbon\Carbon::now()->subDays(($i + 1) * floor($days / 6))->startOfDay();
-                    $subEnd = \Carbon\Carbon::now()->subDays($i * floor($days / 6))->endOfDay();
-                    $categories[] = $subStart->format('M d') . ' - ' . $subEnd->format('M d');
-
-                    $rev = \Illuminate\Support\Facades\DB::table('member_savings')->whereBetween('created_at', [$subStart, $subEnd])->sum('saving_amount')
-                          + \Illuminate\Support\Facades\DB::table('member_contributions')->whereBetween('created_at', [$subStart, $subEnd])->sum('contribution_amount');
-                    $exp = \Illuminate\Support\Facades\DB::table('withdrawal_requests')->where('status_id', 6)->whereBetween('attended_at', [$subStart, $subEnd])->sum('amount')
-                          + \Illuminate\Support\Facades\DB::table('loans')->where('status_id', 6)->whereBetween('attended_at', [$subStart, $subEnd])->sum('principal_amount');
-
-                    $revenueSeries[] = (float) $rev;
-                    $expensesSeries[] = (float) $exp;
-                }
-            } else {
-                for ($i = 11; $i >= 0; $i--) {
-                    $monthDate = \Carbon\Carbon::now()->subMonths($i);
-                    $categories[] = $monthDate->format('M Y');
-
-                    $rev = \Illuminate\Support\Facades\DB::table('member_savings')->whereYear('created_at', $monthDate->year)->whereMonth('created_at', $monthDate->month)->sum('saving_amount')
-                          + \Illuminate\Support\Facades\DB::table('member_contributions')->whereYear('created_at', $monthDate->year)->whereMonth('created_at', $monthDate->month)->sum('contribution_amount');
-                    $exp = \Illuminate\Support\Facades\DB::table('withdrawal_requests')->where('status_id', 6)->whereYear('attended_at', $monthDate->year)->whereMonth('attended_at', $monthDate->month)->sum('amount')
-                          + \Illuminate\Support\Facades\DB::table('loans')->where('status_id', 6)->whereYear('attended_at', $monthDate->year)->whereMonth('attended_at', $monthDate->month)->sum('principal_amount');
-
-                    $revenueSeries[] = (float) $rev;
-                    $expensesSeries[] = (float) $exp;
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'days' => $days,
-                    'dateRangeText' => "{$formattedStartDate} - {$formattedEndDate}",
-                    'totalSales' => number_format($totalRevenue, 2),
-                    'totalExpenses' => number_format($totalExpenses, 2),
-                    'totalSalesRaw' => $totalRevenue,
-                    'totalExpensesRaw' => $totalExpenses,
-                    'categories' => $categories,
-                    'series' => [
-                        [
-                            'name' => 'Revenue',
-                            'data' => $revenueSeries,
-                        ],
-                        [
-                            'name' => 'Expenses',
-                            'data' => $expensesSeries,
-                        ],
-                    ]
-                ]
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load chart metrics: ' . $e->getMessage()
-            ], 500);
-        }
+        // O SAFE Security activity chart overview.
+        return response()->json([
+            'success' => true,
+            'message' => 'Dashboard chart data.',
+            'data' => [
+                'categories' => [],
+                'series'     => [],
+            ]
+        ], 200);
     }
 }

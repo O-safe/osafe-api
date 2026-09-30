@@ -23,8 +23,18 @@ class UserPassportController extends Controller
             if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Member record with ID '{$id}' was not found.",
+                    'message' => "User record with ID '{$id}' was not found.",
                 ], 404);
+            }
+
+            $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+            $authUser = \Illuminate\Support\Facades\Auth::guard('user')->user();
+
+            if (!$admin && $authUser?->user_id !== $user->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized attempt to update passport of another user.',
+                ], 403);
             }
 
             if (!$request->hasFile('passport') || !$request->file('passport')->isValid()) {

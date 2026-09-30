@@ -27,7 +27,7 @@ class StaffRegistration extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
        return (new MailMessage)
-            ->subject('Your Unity Co-op Login Credentials')
+            ->subject('Welcome to O SAFE Security - Staff Credentials')
             ->view('emails.admin.staff-registration', [
                 'password' => $this->password,
                 'fullName' => $this->fullName,
